@@ -1,9 +1,11 @@
 package controller;
 
-import java.math.BigDecimal;
 import model.User;
 import model.Wallet;
 import service.UserService;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -20,22 +22,24 @@ public class UserController {
     public void showMenu() {
         boolean running = true;
         while (running) {
-            ConsoleHelper.printHeader("USER MANAGEMENT");
-            System.out.println("  1. View All Users");
-            System.out.println("  2. Add New User");
-            System.out.println("  3. View Wallet Balance");
-            System.out.println("  4. Add Wallet Balance");
-            System.out.println("  0. Back to Main Menu");
+            ConsoleHelper.printHeader("\ud83d\udc64  USER MANAGEMENT");
+            System.out.println();
+            ConsoleHelper.printMenuItem(1, "View All Users");
+            ConsoleHelper.printMenuItem(2, "Register New User");
+            ConsoleHelper.printMenuItem(3, "View Wallet Balance");
+            ConsoleHelper.printMenuItem(4, "Add Wallet Balance");
+            System.out.println();
+            ConsoleHelper.printMenuBack();
             ConsoleHelper.printDivider();
 
-            int choice = ConsoleHelper.readInt(scanner, "Enter your choice: ");
+            int choice = ConsoleHelper.readInt(scanner, "Choose an option");
             switch (choice) {
                 case 1: viewAllUsers(); break;
-                case 2: addUser(); break;
+                case 2: registerUser(); break;
                 case 3: viewWallet(); break;
                 case 4: addWalletBalance(); break;
                 case 0: running = false; break;
-                default: ConsoleHelper.printError("Invalid choice. Please try again.");
+                default: ConsoleHelper.printError("Invalid choice. Please select 0\u20134.");
             }
         }
     }
@@ -45,62 +49,94 @@ public class UserController {
         try {
             List<User> users = userService.getAllUsers();
             if (users.isEmpty()) {
-                ConsoleHelper.printInfo("No users found.");
-                return;
+                ConsoleHelper.printWarning("No registered users found.");
+            } else {
+                String[] headers = {"ID", "Name", "Email"};
+                List<String[]> rows = new ArrayList<>();
+                for (User u : users) {
+                    rows.add(new String[]{
+                        String.valueOf(u.getUserId()),
+                        u.getName(),
+                        u.getEmail()
+                    });
+                }
+                ConsoleHelper.printTable(headers, rows);
+                ConsoleHelper.printInfo(users.size() + " user(s) registered.");
             }
-            System.out.println();
-            System.out.printf("  %-6s %-20s %-30s%n", "ID", "Name", "Email");
-            ConsoleHelper.printDivider();
-            for (User u : users) {
-                System.out.printf("  %-6d %-20s %-30s%n",
-                    u.getUserId(), u.getName(), u.getEmail());
-            }
-            ConsoleHelper.printDivider();
-            ConsoleHelper.printInfo("Total users: " + users.size());
         } catch (Exception e) {
-            ConsoleHelper.printError("Failed to fetch users: " + e.getMessage());
+            ConsoleHelper.printError("Failed to load users: " + e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 
-    private void addUser() {
+    private void registerUser() {
         ConsoleHelper.printSubHeader("REGISTER NEW USER");
-        String name = ConsoleHelper.readString(scanner, "Enter User Name: ");
-        String email = ConsoleHelper.readString(scanner, "Enter Email: ");
+        String name = ConsoleHelper.readString(scanner, "Full name");
+        String email = ConsoleHelper.readString(scanner, "Email address");
+
         try {
             userService.registerUser(name, email);
-            ConsoleHelper.printSuccess("User '" + name + "' registered successfully! (Wallet auto-created)");
-        } catch (Exception e) {
-            ConsoleHelper.printError("Failed to register user: " + e.getMessage());
-        }
-    }
-
-    private void viewWallet() {
-        ConsoleHelper.printSubHeader("VIEW WALLET BALANCE");
-        int userId = ConsoleHelper.readInt(scanner, "Enter User ID: ");
-        try {
-            Wallet wallet = userService.getWallet(userId);
             System.out.println();
-            System.out.println("  Wallet ID : " + wallet.getWalletId());
-            System.out.println("  User ID   : " + wallet.getUserId());
-            System.out.println("  Balance   : " + wallet.getBalance());
-            ConsoleHelper.printDivider();
+            ConsoleHelper.printSuccess("User '" + name + "' registered successfully!");
+            ConsoleHelper.printInfo("Wallet auto-created with \u20b90.00 balance.");
         } catch (Exception e) {
             ConsoleHelper.printError(e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
+    }
+
+    private void viewWallet() {
+        ConsoleHelper.printSubHeader("WALLET BALANCE");
+        int userId = ConsoleHelper.readInt(scanner, "Enter User ID");
+
+        try {
+            Wallet wallet = userService.getWallet(userId);
+            System.out.println();
+            ConsoleHelper.printKeyValue("User ID", String.valueOf(wallet.getUserId()));
+            ConsoleHelper.printKeyValue("Wallet ID", String.valueOf(wallet.getWalletId()));
+
+            BigDecimal balance = wallet.getBalance();
+            String balanceStr = ConsoleHelper.formatCurrency(balance);
+
+            if (balance.compareTo(new BigDecimal("5000")) >= 0) {
+                ConsoleHelper.printKeyValue("Balance",
+                    ConsoleHelper.BOLD + ConsoleHelper.GREEN + balanceStr + "  \u2605 Premium" + ConsoleHelper.RESET);
+            } else if (balance.compareTo(BigDecimal.ZERO) > 0) {
+                ConsoleHelper.printKeyValue("Balance",
+                    ConsoleHelper.GREEN + balanceStr + ConsoleHelper.RESET);
+            } else {
+                ConsoleHelper.printKeyValue("Balance",
+                    ConsoleHelper.YELLOW + balanceStr + "  \u26a0 Empty wallet" + ConsoleHelper.RESET);
+            }
+        } catch (Exception e) {
+            ConsoleHelper.printError(e.getMessage());
+        }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 
     private void addWalletBalance() {
         ConsoleHelper.printSubHeader("ADD WALLET BALANCE");
-        int userId = ConsoleHelper.readInt(scanner, "Enter User ID: ");
-        BigDecimal amount = ConsoleHelper.readBigDecimal(scanner, "Enter Amount to Add: ");
+        int userId = ConsoleHelper.readInt(scanner, "Enter User ID");
+
         try {
-            userService.addWalletBalance(userId, amount);
-            ConsoleHelper.printSuccess("Added " + amount + " to wallet for User ID: " + userId);
-            // Show updated balance
+            // Show current balance
             Wallet wallet = userService.getWallet(userId);
-            ConsoleHelper.printInfo("Updated Balance: " + wallet.getBalance());
+            ConsoleHelper.printInfo("Current balance: " + ConsoleHelper.formatCurrency(wallet.getBalance()));
+
+            BigDecimal amount = ConsoleHelper.readBigDecimal(scanner, "Amount to add");
+            userService.addWalletBalance(userId, amount);
+
+            // Show new balance
+            Wallet updated = userService.getWallet(userId);
+            System.out.println();
+            ConsoleHelper.printSuccess("Balance updated successfully!");
+            ConsoleHelper.printKeyValue("Previous", ConsoleHelper.formatCurrency(wallet.getBalance()));
+            ConsoleHelper.printKeyValue("Added", "+ " + ConsoleHelper.formatCurrency(amount));
+            ConsoleHelper.printKeyValue("New Balance",
+                ConsoleHelper.BOLD + ConsoleHelper.GREEN + ConsoleHelper.formatCurrency(updated.getBalance()) + ConsoleHelper.RESET);
         } catch (Exception e) {
-            ConsoleHelper.printError("Failed to add balance: " + e.getMessage());
+            ConsoleHelper.printError(e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 }

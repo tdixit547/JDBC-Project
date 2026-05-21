@@ -33,4 +33,19 @@ class DisjointSetUnion{
             rank[pu]++;
         }
     }
-}
+    void unionBySize(int u, int v){
+        int pu = find(u);
+        int pv = find(v);
+        if(pu==pv){
+            return;
+        }
+        if(rank[pu]<rank[pv]){
+            parent[pu] = pv;
+            rank[pv]+=rank[pu];
+        }
+        else{
+            parent[pv] = pu;
+            rank[pu]+=rank[pv];
+        }
+    }
+};

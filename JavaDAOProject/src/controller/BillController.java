@@ -3,6 +3,9 @@ package controller;
 import model.Bill;
 import model.BillItem;
 import service.BillService;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -19,74 +22,131 @@ public class BillController {
     public void showMenu() {
         boolean running = true;
         while (running) {
-            ConsoleHelper.printHeader("BILL MANAGEMENT");
-            System.out.println("  1. View Bills by User");
-            System.out.println("  2. View Bill Details");
-            System.out.println("  0. Back to Main Menu");
+            ConsoleHelper.printHeader("\ud83d\udcdc  BILLS & ORDERS");
+            System.out.println();
+            ConsoleHelper.printMenuItem(1, "View Orders by User");
+            ConsoleHelper.printMenuItem(2, "View Order Details");
+            System.out.println();
+            ConsoleHelper.printMenuBack();
             ConsoleHelper.printDivider();
 
-            int choice = ConsoleHelper.readInt(scanner, "Enter your choice: ");
+            int choice = ConsoleHelper.readInt(scanner, "Choose an option");
             switch (choice) {
                 case 1: viewBillsByUser(); break;
                 case 2: viewBillDetails(); break;
                 case 0: running = false; break;
-                default: ConsoleHelper.printError("Invalid choice. Please try again.");
+                default: ConsoleHelper.printError("Invalid choice. Please select 0\u20132.");
             }
         }
     }
 
     private void viewBillsByUser() {
-        ConsoleHelper.printSubHeader("BILLS BY USER");
-        int userId = ConsoleHelper.readInt(scanner, "Enter User ID: ");
+        ConsoleHelper.printSubHeader("ORDERS BY USER");
+        int userId = ConsoleHelper.readInt(scanner, "Enter User ID");
+
         try {
             List<Bill> bills = billService.getBillsByUser(userId);
             if (bills.isEmpty()) {
-                ConsoleHelper.printInfo("No bills found for User ID: " + userId);
-                return;
+                ConsoleHelper.printWarning("No orders found for User #" + userId + ".");
+            } else {
+                String[] headers = {"Bill ID", "Total Amount", "Date", "Status"};
+                List<String[]> rows = new ArrayList<>();
+                for (Bill b : bills) {
+                    String dateStr = b.getBillDate() != null
+                        ? b.getBillDate().toLocalDate().toString()
+                        : "N/A";
+
+                    String statusStr;
+                    if ("COMPLETED".equalsIgnoreCase(b.getStatus())) {
+                        statusStr = ConsoleHelper.GREEN + "\u2714 " + b.getStatus() + ConsoleHelper.RESET;
+                    } else if ("CANCELLED".equalsIgnoreCase(b.getStatus())) {
+                        statusStr = ConsoleHelper.RED + "\u2718 " + b.getStatus() + ConsoleHelper.RESET;
+                    } else {
+                        statusStr = b.getStatus();
+                    }
+
+                    rows.add(new String[]{
+                        "#" + b.getBillId(),
+                        ConsoleHelper.formatCurrency(b.getTotalAmount()),
+                        dateStr,
+                        statusStr
+                    });
+                }
+                ConsoleHelper.printTable(headers, rows);
+                ConsoleHelper.printInfo(bills.size() + " order(s) found.");
             }
-            System.out.println();
-            System.out.printf("  %-8s %-15s %-22s %-12s%n", "BillID", "Total", "Date", "Status");
-            ConsoleHelper.printDivider();
-            for (Bill b : bills) {
-                System.out.printf("  %-8d %-15s %-22s %-12s%n",
-                    b.getBillId(), b.getTotalAmount(), b.getBillDate(), b.getStatus());
-            }
-            ConsoleHelper.printDivider();
-            ConsoleHelper.printInfo("Total bills: " + bills.size());
         } catch (Exception e) {
-            ConsoleHelper.printError("Failed to fetch bills: " + e.getMessage());
+            ConsoleHelper.printError(e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 
     private void viewBillDetails() {
-        ConsoleHelper.printSubHeader("BILL DETAILS");
-        int billId = ConsoleHelper.readInt(scanner, "Enter Bill ID: ");
+        ConsoleHelper.printSubHeader("ORDER DETAILS");
+        int billId = ConsoleHelper.readInt(scanner, "Enter Bill ID");
+
         try {
             Bill bill = billService.getBillById(billId);
-            System.out.println();
-            System.out.println("  Bill ID      : " + bill.getBillId());
-            System.out.println("  User ID      : " + bill.getUserId());
-            System.out.println("  Total Amount : " + bill.getTotalAmount());
-            System.out.println("  Date         : " + bill.getBillDate());
-            System.out.println("  Status       : " + bill.getStatus());
-            ConsoleHelper.printDivider();
-
             List<BillItem> items = billService.getBillItems(billId);
-            if (items.isEmpty()) {
-                ConsoleHelper.printInfo("No line items found for this bill.");
+
+            // Bill summary
+            System.out.println();
+            ConsoleHelper.printKeyValue("Bill ID", "#" + bill.getBillId());
+            ConsoleHelper.printKeyValue("User ID", String.valueOf(bill.getUserId()));
+            ConsoleHelper.printKeyValue("Date", bill.getBillDate() != null
+                ? bill.getBillDate().toString() : "N/A");
+
+            String statusStr;
+            if ("COMPLETED".equalsIgnoreCase(bill.getStatus())) {
+                statusStr = ConsoleHelper.BOLD + ConsoleHelper.GREEN + "\u2714 " + bill.getStatus() + ConsoleHelper.RESET;
             } else {
-                System.out.println();
-                System.out.println("  Line Items:");
-                System.out.printf("  %-10s %-12s %-10s %-15s%n", "ItemID", "ProductID", "Quantity", "Price");
-                ConsoleHelper.printDivider();
+                statusStr = ConsoleHelper.BOLD + ConsoleHelper.RED + "\u2718 " + bill.getStatus() + ConsoleHelper.RESET;
+            }
+            ConsoleHelper.printKeyValue("Status", statusStr);
+
+            // Line items table
+            if (items.isEmpty()) {
+                ConsoleHelper.printWarning("No line items found for this bill.");
+            } else {
+                ConsoleHelper.printSubHeader("LINE ITEMS");
+
+                String[] headers = {"Item ID", "Product ID", "Qty", "Unit Price", "Line Total"};
+                List<String[]> rows = new ArrayList<>();
+                List<String[]> receiptItems = new ArrayList<>();
+
                 for (BillItem item : items) {
-                    System.out.printf("  %-10d %-12d %-10d %-15s%n",
-                        item.getBillItemId(), item.getProductId(), item.getQuantity(), item.getPriceAtPurchase());
+                    BigDecimal lineTotal = item.getPriceAtPurchase()
+                        .multiply(BigDecimal.valueOf(item.getQuantity()));
+
+                    rows.add(new String[]{
+                        String.valueOf(item.getBillItemId()),
+                        "Product #" + item.getProductId(),
+                        "x" + item.getQuantity(),
+                        ConsoleHelper.formatCurrency(item.getPriceAtPurchase()),
+                        ConsoleHelper.formatCurrency(lineTotal)
+                    });
+
+                    receiptItems.add(new String[]{
+                        "Product #" + item.getProductId(),
+                        "x" + item.getQuantity(),
+                        ConsoleHelper.formatCurrency(item.getPriceAtPurchase()),
+                        ConsoleHelper.formatCurrency(lineTotal)
+                    });
                 }
-                ConsoleHelper.printDivider();
+
+                ConsoleHelper.printTable(headers, rows);
+
+                // Receipt-style total
+                ConsoleHelper.printReceipt(
+                    "\ud83e\uddfe INVOICE #" + billId,
+                    receiptItems,
+                    "GRAND TOTAL",
+                    ConsoleHelper.formatCurrency(bill.getTotalAmount())
+                );
             }
         } catch (Exception e) {
-            ConsoleHelper.printError("Failed to fetch bill details: " + e.getMessage());
+            ConsoleHelper.printError(e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 }

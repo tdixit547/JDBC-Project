@@ -4,6 +4,8 @@ import model.Cart;
 import model.Product;
 import service.CartService;
 import service.ProductService;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -22,125 +24,162 @@ public class CartController {
     public void showMenu() {
         boolean running = true;
         while (running) {
-            ConsoleHelper.printHeader("CART OPERATIONS");
-            System.out.println("  1. View Cart");
-            System.out.println("  2. Add to Cart");
-            System.out.println("  3. Remove Item from Cart");
-            System.out.println("  4. Clear Cart");
-            System.out.println("  0. Back to Main Menu");
+            ConsoleHelper.printHeader("\ud83d\uded2  CART OPERATIONS");
+            System.out.println();
+            ConsoleHelper.printMenuItem(1, "View Cart");
+            ConsoleHelper.printMenuItem(2, "Add to Cart");
+            ConsoleHelper.printMenuItem(3, "Remove Item from Cart");
+            ConsoleHelper.printMenuItem(4, "Clear Entire Cart");
+            System.out.println();
+            ConsoleHelper.printMenuBack();
             ConsoleHelper.printDivider();
 
-            int choice = ConsoleHelper.readInt(scanner, "Enter your choice: ");
+            int choice = ConsoleHelper.readInt(scanner, "Choose an option");
             switch (choice) {
                 case 1: viewCart(); break;
                 case 2: addToCart(); break;
                 case 3: removeFromCart(); break;
                 case 4: clearCart(); break;
                 case 0: running = false; break;
-                default: ConsoleHelper.printError("Invalid choice. Please try again.");
+                default: ConsoleHelper.printError("Invalid choice. Please select 0\u20134.");
             }
         }
     }
 
     private void viewCart() {
-        ConsoleHelper.printSubHeader("VIEW CART");
-        int userId = ConsoleHelper.readInt(scanner, "Enter User ID: ");
+        ConsoleHelper.printSubHeader("YOUR CART");
+        int userId = ConsoleHelper.readInt(scanner, "Enter User ID");
+
         try {
             List<Cart> items = cartService.getCartItems(userId);
             if (items.isEmpty()) {
-                ConsoleHelper.printInfo("Cart is empty for User ID: " + userId);
-                return;
+                ConsoleHelper.printWarning("Cart is empty for User #" + userId + ".");
+            } else {
+                String[] headers = {"Cart ID", "Product ID", "Quantity"};
+                List<String[]> rows = new ArrayList<>();
+                int totalItems = 0;
+                for (Cart c : items) {
+                    rows.add(new String[]{
+                        String.valueOf(c.getCartId()),
+                        "Product #" + c.getProductId(),
+                        "x" + c.getQuantity()
+                    });
+                    totalItems += c.getQuantity();
+                }
+                ConsoleHelper.printTable(headers, rows);
+                ConsoleHelper.printInfo(items.size() + " item(s) in cart, " + totalItems + " total units.");
             }
-            System.out.println();
-            System.out.printf("  %-8s %-10s %-12s %-10s%n", "CartID", "UserID", "ProductID", "Quantity");
-            ConsoleHelper.printDivider();
-            for (Cart c : items) {
-                System.out.printf("  %-8d %-10d %-12d %-10d%n",
-                    c.getCartId(), c.getUserId(), c.getProductId(), c.getQuantity());
-            }
-            ConsoleHelper.printDivider();
-            ConsoleHelper.printInfo("Total items in cart: " + items.size());
         } catch (Exception e) {
-            ConsoleHelper.printError("Failed to fetch cart: " + e.getMessage());
+            ConsoleHelper.printError("Failed to load cart: " + e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 
     private void addToCart() {
         ConsoleHelper.printSubHeader("ADD TO CART");
-        int userId = ConsoleHelper.readInt(scanner, "Enter User ID: ");
+        int userId = ConsoleHelper.readInt(scanner, "Enter User ID");
 
-        // Show available products first
         try {
+            // Show available products
+            ConsoleHelper.printInfo("Available products:");
             List<Product> products = productService.getAllProducts();
             if (products.isEmpty()) {
-                ConsoleHelper.printInfo("No products available.");
+                ConsoleHelper.printWarning("No products available in the catalog.");
+                ConsoleHelper.pressEnterToContinue(scanner);
                 return;
             }
-            System.out.println();
-            System.out.println("  Available Products:");
-            System.out.printf("  %-6s %-25s %-12s %-8s%n", "ID", "Name", "Price", "Stock");
-            ConsoleHelper.printDivider();
-            for (Product p : products) {
-                System.out.printf("  %-6d %-25s %-12s %-8d%n",
-                    p.getProductId(), p.getName(), p.getPrice(), p.getCount());
-            }
-            ConsoleHelper.printDivider();
-        } catch (Exception e) {
-            ConsoleHelper.printError("Failed to fetch products: " + e.getMessage());
-            return;
-        }
 
-        int productId = ConsoleHelper.readInt(scanner, "Enter Product ID: ");
-        int quantity = ConsoleHelper.readInt(scanner, "Enter Quantity: ");
-        try {
+            String[] headers = {"ID", "Product Name", "Price", "Available"};
+            List<String[]> rows = new ArrayList<>();
+            for (Product p : products) {
+                String stockDisplay;
+                if (p.getCount() == 0) {
+                    stockDisplay = ConsoleHelper.RED + "OUT OF STOCK" + ConsoleHelper.RESET;
+                } else if (p.getCount() < 5) {
+                    stockDisplay = ConsoleHelper.YELLOW + p.getCount() + " left" + ConsoleHelper.RESET;
+                } else {
+                    stockDisplay = ConsoleHelper.GREEN + p.getCount() + " available" + ConsoleHelper.RESET;
+                }
+                rows.add(new String[]{
+                    String.valueOf(p.getProductId()),
+                    p.getName(),
+                    ConsoleHelper.formatCurrency(p.getPrice()),
+                    stockDisplay
+                });
+            }
+            ConsoleHelper.printTable(headers, rows);
+
+            int productId = ConsoleHelper.readInt(scanner, "Enter Product ID");
+            int quantity = ConsoleHelper.readInt(scanner, "Enter quantity");
+
             cartService.addToCart(userId, productId, quantity);
-            ConsoleHelper.printSuccess("Added Product ID " + productId + " (qty: " + quantity + ") to cart.");
+            System.out.println();
+            ConsoleHelper.printSuccess("Added " + quantity + " unit(s) of Product #" + productId + " to cart!");
         } catch (Exception e) {
-            ConsoleHelper.printError("Failed to add to cart: " + e.getMessage());
+            ConsoleHelper.printError(e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 
     private void removeFromCart() {
         ConsoleHelper.printSubHeader("REMOVE FROM CART");
-        int userId = ConsoleHelper.readInt(scanner, "Enter User ID: ");
+        int userId = ConsoleHelper.readInt(scanner, "Enter User ID");
 
-        // Show current cart first
         try {
+            // Show current cart
             List<Cart> items = cartService.getCartItems(userId);
             if (items.isEmpty()) {
-                ConsoleHelper.printInfo("Cart is empty for User ID: " + userId);
+                ConsoleHelper.printWarning("Cart is empty. Nothing to remove.");
+                ConsoleHelper.pressEnterToContinue(scanner);
                 return;
             }
-            System.out.println();
-            System.out.printf("  %-8s %-12s %-10s%n", "CartID", "ProductID", "Quantity");
-            ConsoleHelper.printDivider();
-            for (Cart c : items) {
-                System.out.printf("  %-8d %-12d %-10d%n",
-                    c.getCartId(), c.getProductId(), c.getQuantity());
-            }
-            ConsoleHelper.printDivider();
-        } catch (Exception e) {
-            ConsoleHelper.printError("Failed to fetch cart: " + e.getMessage());
-            return;
-        }
 
-        int cartId = ConsoleHelper.readInt(scanner, "Enter Cart ID to remove: ");
-        try {
+            String[] headers = {"Cart ID", "Product ID", "Quantity"};
+            List<String[]> rows = new ArrayList<>();
+            for (Cart c : items) {
+                rows.add(new String[]{
+                    String.valueOf(c.getCartId()),
+                    "Product #" + c.getProductId(),
+                    "x" + c.getQuantity()
+                });
+            }
+            ConsoleHelper.printTable(headers, rows);
+
+            int cartId = ConsoleHelper.readInt(scanner, "Enter Cart ID to remove");
             cartService.removeFromCart(userId, cartId);
-            ConsoleHelper.printSuccess("Removed Cart ID " + cartId + " from cart.");
+            System.out.println();
+            ConsoleHelper.printSuccess("Item removed from cart. Product stock has been restored.");
         } catch (Exception e) {
-            ConsoleHelper.printError("Failed to remove from cart: " + e.getMessage());
+            ConsoleHelper.printError(e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 
     private void clearCart() {
         ConsoleHelper.printSubHeader("CLEAR CART");
-        int userId = ConsoleHelper.readInt(scanner, "Enter User ID: ");
+        int userId = ConsoleHelper.readInt(scanner, "Enter User ID");
+
         try {
-            cartService.clearCart(userId);
-            ConsoleHelper.printSuccess("Cart cleared for User ID: " + userId);
+            List<Cart> items = cartService.getCartItems(userId);
+            if (items.isEmpty()) {
+                ConsoleHelper.printWarning("Cart is already empty.");
+                ConsoleHelper.pressEnterToContinue(scanner);
+                return;
+            }
+
+            ConsoleHelper.printInfo("Cart has " + items.size() + " item(s).");
+            ConsoleHelper.printWarning("This will remove all items and restore all product stock.");
+            boolean confirm = ConsoleHelper.readConfirmation(scanner, "Clear entire cart?");
+
+            if (confirm) {
+                cartService.clearCart(userId);
+                ConsoleHelper.printSuccess("Cart cleared! All product stock has been restored.");
+            } else {
+                ConsoleHelper.printInfo("Cart clear cancelled.");
+            }
         } catch (Exception e) {
-            ConsoleHelper.printError("Failed to clear cart: " + e.getMessage());
+            ConsoleHelper.printError(e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 }

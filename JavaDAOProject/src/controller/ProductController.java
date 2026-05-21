@@ -1,8 +1,10 @@
 package controller;
 
-import java.math.BigDecimal;
 import model.Product;
 import service.ProductService;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -19,16 +21,18 @@ public class ProductController {
     public void showMenu() {
         boolean running = true;
         while (running) {
-            ConsoleHelper.printHeader("PRODUCT MANAGEMENT");
-            System.out.println("  1. View All Products");
-            System.out.println("  2. View Product by ID");
-            System.out.println("  3. Add New Product");
-            System.out.println("  4. Update Product Stock");
-            System.out.println("  5. Delete Product");
-            System.out.println("  0. Back to Main Menu");
+            ConsoleHelper.printHeader("\ud83d\udce6  PRODUCT MANAGEMENT");
+            System.out.println();
+            ConsoleHelper.printMenuItem(1, "View All Products");
+            ConsoleHelper.printMenuItem(2, "View Product Details");
+            ConsoleHelper.printMenuItem(3, "Add New Product");
+            ConsoleHelper.printMenuItem(4, "Update Stock");
+            ConsoleHelper.printMenuItem(5, "Delete Product");
+            System.out.println();
+            ConsoleHelper.printMenuBack();
             ConsoleHelper.printDivider();
 
-            int choice = ConsoleHelper.readInt(scanner, "Enter your choice: ");
+            int choice = ConsoleHelper.readInt(scanner, "Choose an option");
             switch (choice) {
                 case 1: viewAllProducts(); break;
                 case 2: viewProductById(); break;
@@ -36,7 +40,7 @@ public class ProductController {
                 case 4: updateStock(); break;
                 case 5: deleteProduct(); break;
                 case 0: running = false; break;
-                default: ConsoleHelper.printError("Invalid choice. Please try again.");
+                default: ConsoleHelper.printError("Invalid choice. Please select 0\u20135.");
             }
         }
     }
@@ -46,71 +50,122 @@ public class ProductController {
         try {
             List<Product> products = productService.getAllProducts();
             if (products.isEmpty()) {
-                ConsoleHelper.printInfo("No products found.");
-                return;
+                ConsoleHelper.printWarning("No products found in the catalog.");
+            } else {
+                String[] headers = {"ID", "Product Name", "Price", "Stock"};
+                List<String[]> rows = new ArrayList<>();
+                for (Product p : products) {
+                    String stockDisplay = p.getCount() + " units";
+                    if (p.getCount() == 0) {
+                        stockDisplay = ConsoleHelper.BOLD + ConsoleHelper.RED + "OUT OF STOCK" + ConsoleHelper.RESET;
+                    } else if (p.getCount() < 5) {
+                        stockDisplay = ConsoleHelper.YELLOW + p.getCount() + " units (LOW)" + ConsoleHelper.RESET;
+                    }
+                    rows.add(new String[]{
+                        String.valueOf(p.getProductId()),
+                        p.getName(),
+                        ConsoleHelper.formatCurrency(p.getPrice()),
+                        stockDisplay
+                    });
+                }
+                ConsoleHelper.printTable(headers, rows);
+                ConsoleHelper.printInfo(products.size() + " product(s) found.");
             }
-            printProductTable(products);
         } catch (Exception e) {
-            ConsoleHelper.printError("Failed to fetch products: " + e.getMessage());
+            ConsoleHelper.printError("Failed to load products: " + e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 
     private void viewProductById() {
-        ConsoleHelper.printSubHeader("VIEW PRODUCT BY ID");
-        int id = ConsoleHelper.readInt(scanner, "Enter Product ID: ");
+        ConsoleHelper.printSubHeader("PRODUCT DETAILS");
+        int id = ConsoleHelper.readInt(scanner, "Enter Product ID");
         try {
-            Product product = productService.getProductById(id);
-            printProductTable(List.of(product));
+            Product p = productService.getProductById(id);
+            System.out.println();
+            ConsoleHelper.printKeyValue("Product ID", String.valueOf(p.getProductId()));
+            ConsoleHelper.printKeyValue("Name", p.getName());
+            ConsoleHelper.printKeyValue("Price", ConsoleHelper.formatCurrency(p.getPrice()));
+
+            String stockStatus;
+            if (p.getCount() == 0) {
+                stockStatus = ConsoleHelper.BOLD + ConsoleHelper.RED + "OUT OF STOCK" + ConsoleHelper.RESET;
+            } else if (p.getCount() < 5) {
+                stockStatus = ConsoleHelper.YELLOW + p.getCount() + " units \u26a0 LOW STOCK" + ConsoleHelper.RESET;
+            } else {
+                stockStatus = ConsoleHelper.GREEN + p.getCount() + " units \u2714 In Stock" + ConsoleHelper.RESET;
+            }
+            ConsoleHelper.printKeyValue("Stock", stockStatus);
         } catch (Exception e) {
             ConsoleHelper.printError(e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 
     private void addProduct() {
         ConsoleHelper.printSubHeader("ADD NEW PRODUCT");
-        String name = ConsoleHelper.readString(scanner, "Enter Product Name: ");
-        BigDecimal price = ConsoleHelper.readBigDecimal(scanner, "Enter Price: ");
-        int stock = ConsoleHelper.readInt(scanner, "Enter Stock Quantity: ");
+        String name = ConsoleHelper.readString(scanner, "Product name");
+        BigDecimal price = ConsoleHelper.readBigDecimal(scanner, "Price");
+        int stock = ConsoleHelper.readInt(scanner, "Initial stock quantity");
+
         try {
             productService.addProduct(name, price, stock);
+            System.out.println();
             ConsoleHelper.printSuccess("Product '" + name + "' added successfully!");
+            ConsoleHelper.printKeyValue("Price", ConsoleHelper.formatCurrency(price));
+            ConsoleHelper.printKeyValue("Stock", stock + " units");
         } catch (Exception e) {
-            ConsoleHelper.printError("Failed to add product: " + e.getMessage());
+            ConsoleHelper.printError(e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 
     private void updateStock() {
-        ConsoleHelper.printSubHeader("UPDATE PRODUCT STOCK");
-        int id = ConsoleHelper.readInt(scanner, "Enter Product ID: ");
-        int newStock = ConsoleHelper.readInt(scanner, "Enter New Stock Quantity: ");
+        ConsoleHelper.printSubHeader("UPDATE STOCK");
         try {
-            productService.updateStock(id, newStock);
-            ConsoleHelper.printSuccess("Stock updated successfully for Product ID: " + id);
+            // Show current products first
+            List<Product> products = productService.getAllProducts();
+            if (!products.isEmpty()) {
+                String[] headers = {"ID", "Product Name", "Current Stock"};
+                List<String[]> rows = new ArrayList<>();
+                for (Product p : products) {
+                    rows.add(new String[]{
+                        String.valueOf(p.getProductId()),
+                        p.getName(),
+                        p.getCount() + " units"
+                    });
+                }
+                ConsoleHelper.printTable(headers, rows);
+            }
+
+            int id = ConsoleHelper.readInt(scanner, "Enter Product ID to update");
+            int newCount = ConsoleHelper.readInt(scanner, "Enter new stock count");
+            productService.updateStock(id, newCount);
+            ConsoleHelper.printSuccess("Stock updated to " + newCount + " units.");
         } catch (Exception e) {
-            ConsoleHelper.printError("Failed to update stock: " + e.getMessage());
+            ConsoleHelper.printError(e.getMessage());
         }
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 
     private void deleteProduct() {
         ConsoleHelper.printSubHeader("DELETE PRODUCT");
-        int id = ConsoleHelper.readInt(scanner, "Enter Product ID to delete: ");
-        try {
-            productService.deleteProduct(id);
-            ConsoleHelper.printSuccess("Product ID " + id + " deleted successfully.");
-        } catch (Exception e) {
-            ConsoleHelper.printError("Failed to delete product: " + e.getMessage());
-        }
-    }
+        int id = ConsoleHelper.readInt(scanner, "Enter Product ID to delete");
 
-    private void printProductTable(List<Product> products) {
-        System.out.println();
-        System.out.printf("  %-6s %-25s %-12s %-8s%n", "ID", "Name", "Price", "Stock");
-        ConsoleHelper.printDivider();
-        for (Product p : products) {
-            System.out.printf("  %-6d %-25s %-12s %-8d%n",
-                p.getProductId(), p.getName(), p.getPrice(), p.getCount());
+        try {
+            Product p = productService.getProductById(id);
+            ConsoleHelper.printWarning("You are about to delete: " + p.getName());
+            boolean confirm = ConsoleHelper.readConfirmation(scanner, "Are you sure?");
+
+            if (confirm) {
+                productService.deleteProduct(id);
+                ConsoleHelper.printSuccess("Product '" + p.getName() + "' deleted.");
+            } else {
+                ConsoleHelper.printInfo("Deletion cancelled.");
+            }
+        } catch (Exception e) {
+            ConsoleHelper.printError(e.getMessage());
         }
-        ConsoleHelper.printDivider();
-        ConsoleHelper.printInfo("Total products: " + products.size());
+        ConsoleHelper.pressEnterToContinue(scanner);
     }
 }
