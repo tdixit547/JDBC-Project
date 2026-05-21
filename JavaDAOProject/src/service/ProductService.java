@@ -20,7 +20,8 @@ public class ProductService {
         return productDAO.getAll();
     }
 
-    public Product getProductById(int productId) throws SQLException, ProductNotFoundException {
+    public Product getProductById(int productId) throws SQLException, ProductNotFoundException, InvalidInputException {
+        validateId(productId, "Product ID");
         Product product = productDAO.getById(productId);
         if (product == null) {
             throw new ProductNotFoundException("Product with ID " + productId + " not found.");
@@ -48,14 +49,30 @@ public class ProductService {
         productDAO.update(product);
     }
 
-    public void updateStock(int productId, int newCount) throws SQLException, InvalidInputException {
+    public void updateStock(int productId, int newCount) throws Exception {
+        validateId(productId, "Product ID");
         if (newCount < 0) {
             throw new InvalidInputException("Stock count cannot be negative.");
+        }
+        Product existing = productDAO.getById(productId);
+        if (existing == null) {
+            throw new ProductNotFoundException("Product with ID " + productId + " not found.");
         }
         productDAO.updateCount(productId, newCount);
     }
 
-    public void deleteProduct(int productId) throws SQLException {
+    public void deleteProduct(int productId) throws Exception {
+        validateId(productId, "Product ID");
+        Product existing = productDAO.getById(productId);
+        if (existing == null) {
+            throw new ProductNotFoundException("Product with ID " + productId + " not found.");
+        }
         productDAO.delete(productId);
+    }
+
+    private void validateId(int id, String fieldName) throws InvalidInputException {
+        if (id <= 0) {
+            throw new InvalidInputException(fieldName + " must be a positive number.");
+        }
     }
 }

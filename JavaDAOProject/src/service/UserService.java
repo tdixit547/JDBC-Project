@@ -26,7 +26,8 @@ public class UserService {
         return userDAO.getAll();
     }
 
-    public User getUserById(int userId) throws SQLException, UserNotFoundException {
+    public User getUserById(int userId) throws SQLException, UserNotFoundException, InvalidInputException {
+        validateId(userId, "User ID");
         User user = userDAO.getById(userId);
         if (user == null) {
             throw new UserNotFoundException("User with ID " + userId + " not found.");
@@ -60,11 +61,17 @@ public class UserService {
         userDAO.update(user);
     }
 
-    public void deleteUser(int userId) throws SQLException {
+    public void deleteUser(int userId) throws Exception {
+        validateId(userId, "User ID");
+        User existing = userDAO.getById(userId);
+        if (existing == null) {
+            throw new UserNotFoundException("User with ID " + userId + " not found.");
+        }
         userDAO.delete(userId);
     }
 
-    public Wallet getWallet(int userId) throws SQLException, UserNotFoundException {
+    public Wallet getWallet(int userId) throws SQLException, UserNotFoundException, InvalidInputException {
+        validateId(userId, "User ID");
         Wallet wallet = walletDAO.getByUserId(userId);
         if (wallet == null) {
             throw new UserNotFoundException("Wallet not found for user ID " + userId + ".");
@@ -73,6 +80,7 @@ public class UserService {
     }
 
     public void addWalletBalance(int userId, BigDecimal amount) throws Exception {
+        validateId(userId, "User ID");
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidInputException("Amount must be greater than zero.");
         }
@@ -82,5 +90,11 @@ public class UserService {
         }
         BigDecimal newBalance = wallet.getBalance().add(amount);
         walletDAO.updateBalance(userId, newBalance);
+    }
+
+    private void validateId(int id, String fieldName) throws InvalidInputException {
+        if (id <= 0) {
+            throw new InvalidInputException(fieldName + " must be a positive number.");
+        }
     }
 }

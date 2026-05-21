@@ -21,7 +21,8 @@ public class CartService {
         this.productDAO = DAOFactory.getProductDAO();
     }
 
-    public List<Cart> getCartItems(int userId) throws SQLException {
+    public List<Cart> getCartItems(int userId) throws SQLException, InvalidInputException {
+        validateId(userId, "User ID");
         return cartDAO.getByUserId(userId);
     }
 
@@ -31,6 +32,8 @@ public class CartService {
      * Decrements product stock atomically.
      */
     public void addToCart(int userId, int productId, int quantity) throws Exception {
+        validateId(userId, "User ID");
+        validateId(productId, "Product ID");
         if (quantity <= 0) {
             throw new InvalidInputException("Quantity must be greater than zero.");
         }
@@ -66,6 +69,8 @@ public class CartService {
      * Requires userId to look up the cart item details.
      */
     public void removeFromCart(int userId, int cartId) throws Exception {
+        validateId(userId, "User ID");
+        validateId(cartId, "Cart ID");
         Connection conn = DAOFactory.getConnection();
         TransactionManager.executeInTransaction(conn, () -> {
             // Find the cart item to restore stock
@@ -96,6 +101,7 @@ public class CartService {
      * Clears all items from the user's cart and RESTORES all product stock.
      */
     public void clearCart(int userId) throws Exception {
+        validateId(userId, "User ID");
         Connection conn = DAOFactory.getConnection();
         TransactionManager.executeInTransaction(conn, () -> {
             List<Cart> cartItems = cartDAO.getByUserId(userId);
@@ -111,5 +117,11 @@ public class CartService {
             // Clear the cart
             cartDAO.deleteByUserId(userId);
         });
+    }
+
+    private void validateId(int id, String fieldName) throws InvalidInputException {
+        if (id <= 0) {
+            throw new InvalidInputException(fieldName + " must be a positive number.");
+        }
     }
 }

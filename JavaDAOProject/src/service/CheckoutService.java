@@ -39,6 +39,9 @@ public class CheckoutService {
      * Returns the generated bill ID.
      */
     public int checkout(int userId) throws Exception {
+        if (userId <= 0) {
+            throw new InvalidInputException("User ID must be a positive number.");
+        }
         Connection conn = DAOFactory.getConnection();
 
         return TransactionManager.executeInTransaction(conn, () -> {
