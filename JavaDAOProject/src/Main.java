@@ -1,12 +1,25 @@
 import service.*;
 import controller.MenuController;
+import server.AppServer;
 import util.DBConnection;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        // Web server mode
+        if (args.length > 0 && "--web".equals(args[0])) {
+            try {
+                AppServer appServer = new AppServer(8080);
+                appServer.start();
+            } catch (Exception e) {
+                System.err.println("[FATAL] Failed to start web server: " + e.getMessage());
+                e.printStackTrace();
+            }
+            return;
+        }
 
+        // Console mode
+        Scanner scanner = new Scanner(System.in);
         try {
             // Initialize services
             ProductService productService = new ProductService();
