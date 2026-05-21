@@ -44,9 +44,7 @@ public class MenuController {
                     running = false;
                     System.out.println();
                     ConsoleHelper.printDivider();
-                    ConsoleHelper.printInfo("Thank you for shopping with us!");
-                    System.out.println(ConsoleHelper.BOLD + ConsoleHelper.CYAN +
-                        "  \ud83d\udc4b Goodbye! See you next time." + ConsoleHelper.RESET);
+                    ConsoleHelper.printInfo("Goodbye!");
                     ConsoleHelper.printDivider();
                     System.out.println();
                     break;
@@ -59,11 +57,11 @@ public class MenuController {
     private void printMainMenu() {
         ConsoleHelper.printHeader("MAIN MENU");
         System.out.println();
-        ConsoleHelper.printMenuItem(1, "\ud83d\udce6  Product Management");
-        ConsoleHelper.printMenuItem(2, "\ud83d\udc64  User Management");
-        ConsoleHelper.printMenuItem(3, "\ud83d\uded2  Cart Operations");
-        ConsoleHelper.printMenuItem(4, "\ud83d\udcb3  Checkout");
-        ConsoleHelper.printMenuItem(5, "\ud83d\udcdc  View Bills & Orders");
+        ConsoleHelper.printMenuItem(1, "Product Management");
+        ConsoleHelper.printMenuItem(2, "User Management");
+        ConsoleHelper.printMenuItem(3, "Cart Operations");
+        ConsoleHelper.printMenuItem(4, "Checkout");
+        ConsoleHelper.printMenuItem(5, "View Bills & Orders");
         System.out.println();
         ConsoleHelper.printMenuExit();
         ConsoleHelper.printDivider();
@@ -97,7 +95,7 @@ public class MenuController {
                 }
 
                 ConsoleHelper.printReceipt(
-                    "\ud83e\uddfe INVOICE #" + billId,
+                    "INVOICE #" + billId,
                     receiptItems,
                     "TOTAL",
                     ConsoleHelper.formatCurrency(bill.getTotalAmount())

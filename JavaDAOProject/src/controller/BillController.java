@@ -22,7 +22,7 @@ public class BillController {
     public void showMenu() {
         boolean running = true;
         while (running) {
-            ConsoleHelper.printHeader("\ud83d\udcdc  BILLS & ORDERS");
+            ConsoleHelper.printHeader("BILLS & ORDERS");
             System.out.println();
             ConsoleHelper.printMenuItem(1, "View Orders by User");
             ConsoleHelper.printMenuItem(2, "View Order Details");
@@ -58,9 +58,9 @@ public class BillController {
 
                     String statusStr;
                     if ("COMPLETED".equalsIgnoreCase(b.getStatus())) {
-                        statusStr = ConsoleHelper.GREEN + "\u2714 " + b.getStatus() + ConsoleHelper.RESET;
+                        statusStr = ConsoleHelper.GREEN + b.getStatus() + ConsoleHelper.RESET;
                     } else if ("CANCELLED".equalsIgnoreCase(b.getStatus())) {
-                        statusStr = ConsoleHelper.RED + "\u2718 " + b.getStatus() + ConsoleHelper.RESET;
+                        statusStr = ConsoleHelper.RED + b.getStatus() + ConsoleHelper.RESET;
                     } else {
                         statusStr = b.getStatus();
                     }
@@ -98,9 +98,9 @@ public class BillController {
 
             String statusStr;
             if ("COMPLETED".equalsIgnoreCase(bill.getStatus())) {
-                statusStr = ConsoleHelper.BOLD + ConsoleHelper.GREEN + "\u2714 " + bill.getStatus() + ConsoleHelper.RESET;
+                statusStr = ConsoleHelper.BOLD + ConsoleHelper.GREEN + bill.getStatus() + ConsoleHelper.RESET;
             } else {
-                statusStr = ConsoleHelper.BOLD + ConsoleHelper.RED + "\u2718 " + bill.getStatus() + ConsoleHelper.RESET;
+                statusStr = ConsoleHelper.BOLD + ConsoleHelper.RED + bill.getStatus() + ConsoleHelper.RESET;
             }
             ConsoleHelper.printKeyValue("Status", statusStr);
 
@@ -138,7 +138,7 @@ public class BillController {
 
                 // Receipt-style total
                 ConsoleHelper.printReceipt(
-                    "\ud83e\uddfe INVOICE #" + billId,
+                    "INVOICE #" + billId,
                     receiptItems,
                     "GRAND TOTAL",
                     ConsoleHelper.formatCurrency(bill.getTotalAmount())

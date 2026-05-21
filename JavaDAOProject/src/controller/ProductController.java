@@ -21,7 +21,7 @@ public class ProductController {
     public void showMenu() {
         boolean running = true;
         while (running) {
-            ConsoleHelper.printHeader("\ud83d\udce6  PRODUCT MANAGEMENT");
+            ConsoleHelper.printHeader("PRODUCT MANAGEMENT");
             System.out.println();
             ConsoleHelper.printMenuItem(1, "View All Products");
             ConsoleHelper.printMenuItem(2, "View Product Details");
@@ -91,9 +91,9 @@ public class ProductController {
             if (p.getCount() == 0) {
                 stockStatus = ConsoleHelper.BOLD + ConsoleHelper.RED + "OUT OF STOCK" + ConsoleHelper.RESET;
             } else if (p.getCount() < 5) {
-                stockStatus = ConsoleHelper.YELLOW + p.getCount() + " units \u26a0 LOW STOCK" + ConsoleHelper.RESET;
+                stockStatus = ConsoleHelper.YELLOW + p.getCount() + " units - LOW STOCK" + ConsoleHelper.RESET;
             } else {
-                stockStatus = ConsoleHelper.GREEN + p.getCount() + " units \u2714 In Stock" + ConsoleHelper.RESET;
+                stockStatus = ConsoleHelper.GREEN + p.getCount() + " units - In Stock" + ConsoleHelper.RESET;
             }
             ConsoleHelper.printKeyValue("Stock", stockStatus);
         } catch (Exception e) {

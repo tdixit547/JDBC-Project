@@ -90,26 +90,26 @@ public class ConsoleHelper {
 
     public static void printSubHeader(String title) {
         System.out.println();
-        System.out.println(BOLD + YELLOW + "  \u25b8 " + title + RESET);
+        System.out.println(BOLD + YELLOW + "  > " + title + RESET);
         System.out.println(DIM + "  " + repeat("\u2500", title.length() + 2) + RESET);
     }
 
     // ── Status Messages ───────────────────────────────────────────────
 
     public static void printSuccess(String message) {
-        System.out.println(BOLD + GREEN + "  \u2714 " + message + RESET);
+        System.out.println(BOLD + GREEN + "  [OK] " + message + RESET);
     }
 
     public static void printError(String message) {
-        System.out.println(BOLD + RED + "  \u2718 " + message + RESET);
+        System.out.println(BOLD + RED + "  [ERROR] " + message + RESET);
     }
 
     public static void printWarning(String message) {
-        System.out.println(YELLOW + "  \u26a0 " + message + RESET);
+        System.out.println(YELLOW + "  [!] " + message + RESET);
     }
 
     public static void printInfo(String message) {
-        System.out.println(CYAN + "  \u2139 " + message + RESET);
+        System.out.println(CYAN + "  [i] " + message + RESET);
     }
 
     // ── Menu Items ────────────────────────────────────────────────────
@@ -119,7 +119,7 @@ public class ConsoleHelper {
     }
 
     public static void printMenuBack() {
-        System.out.println("    " + DIM + "[0]" + "  \u2190 Back" + RESET);
+        System.out.println("    " + DIM + "[0]" + "  Back" + RESET);
     }
 
     public static void printMenuExit() {
@@ -260,7 +260,7 @@ public class ConsoleHelper {
 
     public static int readInt(Scanner scanner, String prompt) {
         while (true) {
-            System.out.print("\n  " + BOLD + YELLOW + "\u276f " + RESET + DIM + prompt + ": " + RESET);
+            System.out.print("\n  " + BOLD + YELLOW + "> " + RESET + DIM + prompt + ": " + RESET);
             if (scanner.hasNextInt()) {
                 int value = scanner.nextInt();
                 scanner.nextLine(); // consume newline
@@ -274,7 +274,7 @@ public class ConsoleHelper {
 
     public static BigDecimal readBigDecimal(Scanner scanner, String prompt) {
         while (true) {
-            System.out.print("\n  " + BOLD + YELLOW + "\u276f " + RESET + DIM + prompt + ": " + RESET);
+            System.out.print("\n  " + BOLD + YELLOW + "> " + RESET + DIM + prompt + ": " + RESET);
             if (scanner.hasNextBigDecimal()) {
                 BigDecimal value = scanner.nextBigDecimal();
                 scanner.nextLine();
@@ -287,7 +287,7 @@ public class ConsoleHelper {
     }
 
     public static String readString(Scanner scanner, String prompt) {
-        System.out.print("\n  " + BOLD + YELLOW + "\u276f " + RESET + DIM + prompt + ": " + RESET);
+        System.out.print("\n  " + BOLD + YELLOW + "> " + RESET + DIM + prompt + ": " + RESET);
         return scanner.nextLine().trim();
     }
 
@@ -300,7 +300,7 @@ public class ConsoleHelper {
     // ── Formatting Helpers ────────────────────────────────────────────
 
     public static String formatCurrency(BigDecimal amount) {
-        if (amount == null) return "\u20b90.00";
+        if (amount == null) return "0.00";
         return CURRENCY_FORMAT.format(amount);
     }
 

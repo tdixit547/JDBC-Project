@@ -22,7 +22,7 @@ public class UserController {
     public void showMenu() {
         boolean running = true;
         while (running) {
-            ConsoleHelper.printHeader("\ud83d\udc64  USER MANAGEMENT");
+            ConsoleHelper.printHeader("USER MANAGEMENT");
             System.out.println();
             ConsoleHelper.printMenuItem(1, "View All Users");
             ConsoleHelper.printMenuItem(2, "Register New User");
@@ -78,7 +78,7 @@ public class UserController {
             userService.registerUser(name, email);
             System.out.println();
             ConsoleHelper.printSuccess("User '" + name + "' registered successfully!");
-            ConsoleHelper.printInfo("Wallet auto-created with \u20b90.00 balance.");
+            ConsoleHelper.printInfo("Wallet created with 0.00 balance.");
         } catch (Exception e) {
             ConsoleHelper.printError(e.getMessage());
         }
@@ -98,15 +98,12 @@ public class UserController {
             BigDecimal balance = wallet.getBalance();
             String balanceStr = ConsoleHelper.formatCurrency(balance);
 
-            if (balance.compareTo(new BigDecimal("5000")) >= 0) {
-                ConsoleHelper.printKeyValue("Balance",
-                    ConsoleHelper.BOLD + ConsoleHelper.GREEN + balanceStr + "  \u2605 Premium" + ConsoleHelper.RESET);
-            } else if (balance.compareTo(BigDecimal.ZERO) > 0) {
+            if (balance.compareTo(BigDecimal.ZERO) > 0) {
                 ConsoleHelper.printKeyValue("Balance",
                     ConsoleHelper.GREEN + balanceStr + ConsoleHelper.RESET);
             } else {
                 ConsoleHelper.printKeyValue("Balance",
-                    ConsoleHelper.YELLOW + balanceStr + "  \u26a0 Empty wallet" + ConsoleHelper.RESET);
+                    ConsoleHelper.YELLOW + balanceStr + "  (Empty)" + ConsoleHelper.RESET);
             }
         } catch (Exception e) {
             ConsoleHelper.printError(e.getMessage());

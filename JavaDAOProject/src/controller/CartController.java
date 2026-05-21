@@ -24,7 +24,7 @@ public class CartController {
     public void showMenu() {
         boolean running = true;
         while (running) {
-            ConsoleHelper.printHeader("\ud83d\uded2  CART OPERATIONS");
+            ConsoleHelper.printHeader("CART OPERATIONS");
             System.out.println();
             ConsoleHelper.printMenuItem(1, "View Cart");
             ConsoleHelper.printMenuItem(2, "Add to Cart");
