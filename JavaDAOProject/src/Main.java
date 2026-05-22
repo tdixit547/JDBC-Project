@@ -8,8 +8,14 @@ public class Main {
     public static void main(String[] args) {
         // Web server mode
         if (args.length > 0 && "--web".equals(args[0])) {
+            int port = 8080;
+            if (args.length > 1) {
+                try {
+                    port = Integer.parseInt(args[1]);
+                } catch (NumberFormatException ignore) {}
+            }
             try {
-                AppServer appServer = new AppServer(8080);
+                AppServer appServer = new AppServer(port);
                 appServer.start();
             } catch (Exception e) {
                 System.err.println("[FATAL] Failed to start web server: " + e.getMessage());

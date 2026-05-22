@@ -14,8 +14,16 @@ public class StaticFileHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        // Add CORS headers for image requests
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+
         String path = exchange.getRequestURI().getPath();
-        if (path.equals("/")) path = "/index.html";
+        // Strip the context path (e.g. /images/food_1.png -> /food_1.png)
+        String contextPath = exchange.getHttpContext().getPath();
+        if (path.startsWith(contextPath)) {
+            path = path.substring(contextPath.length());
+        }
+        if (path.equals("/") || path.isEmpty()) path = "/index.html";
 
         File file = new File(webRoot, path);
         if (!file.exists() || file.isDirectory()) {

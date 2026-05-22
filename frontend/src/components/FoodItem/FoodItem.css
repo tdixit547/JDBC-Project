@@ -1,0 +1,144 @@
+.food-item {
+    width: 100%;
+    margin: auto;
+    border-radius: 15px;
+    box-shadow: 0px 10px 20px var(--shadow-color);
+    transition: 0.3s;
+    animation: fadeIn 1s;
+    background-color: var(--card-bg);
+    cursor: pointer;
+    overflow: hidden; /* Ensures image stays within border-radius */
+}
+
+.food-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 15px 30px var(--shadow-hover);
+}
+
+.food-item-image {
+    width: 100%;
+    border-radius: 15px 15px 0px 0px;
+    object-fit: cover; /* Ensures image covers area nicely */
+    transition: transform 0.5s ease;
+}
+
+/* Optional: Slight zoom on hover for image */
+.food-item:hover .food-item-image {
+    transform: scale(1.02);
+}
+
+.food-item-info {
+    padding: 20px;
+}
+
+.food-item-name-rating {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.food-item-name-rating p {
+    font-size: 20px;
+    font-weight: 600; /* Bolder for premium feel */
+    color: var(--text-color);
+}
+
+.food-item-name-rating img {
+    width: 70px;
+}
+
+.food-item-desc {
+    color: var(--text-color-secondary);
+    font-size: 13px; /* Slightly larger for readability */
+    line-height: 1.6;
+}
+
+.food-item-price {
+    color: var(--primary-color); /* Tomato color, slightly adjusted */
+    font-size: 22px;
+    font-weight: 600;
+    margin: 15px 0px 5px 0px;
+}
+
+.food-item-img-container {
+    position: relative;
+}
+
+/* Beautiful Floating Add Button - PRO Design */
+.add-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    cursor: pointer;
+    border-radius: 50px;
+    background-color: var(--card-bg);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+    padding: 10px 25px; /* Pill shape */
+    border: 1px solid var(--border-color);
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.25);
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.add-btn:active {
+    transform: scale(0.95);
+}
+
+/* Counter Pill Styling */
+.food-item-counter {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 50px;
+    background-color: var(--card-bg);
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.3s ease-in-out;
+    border: 1px solid var(--primary-color);
+}
+
+.counter-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: 0.2s;
+    user-select: none;
+}
+
+.counter-btn:hover {
+    transform: scale(1.1);
+    background-color: #ff4500; /* Slightly darker orange/tomato */
+}
+
+.food-item-counter p {
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--text-color);
+    margin: 0;
+    min-width: 25px;
+    text-align: center;
+}
