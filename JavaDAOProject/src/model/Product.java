@@ -8,20 +8,23 @@ public class Product {
     private String name;
     private BigDecimal price;
     private int count;
+    private String imageUrl;
 
     public Product() {}
 
-    public Product(String name, BigDecimal price, int count) {
+    public Product(String name, BigDecimal price, int count, String imageUrl) {
         this.name = name;
         setPrice(price);
         setCount(count);
+        this.imageUrl = imageUrl;
     }
 
-    public Product(int productId, String name, BigDecimal price, int count) {
+    public Product(int productId, String name, BigDecimal price, int count, String imageUrl) {
         this.productId = productId;
         this.name = name;
         setPrice(price);
         setCount(count);
+        this.imageUrl = imageUrl;
     }
 
     // Getters and Setters
@@ -47,6 +50,9 @@ public class Product {
         this.count = count;
     }
 
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -62,6 +68,6 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{productId=" + productId + ", name='" + name + "', price=" + price + ", count=" + count + "}";
+        return "Product{productId=" + productId + ", name='" + name + "', price=" + price + ", count=" + count + ", imageUrl='" + imageUrl + "'}";
     }
 }

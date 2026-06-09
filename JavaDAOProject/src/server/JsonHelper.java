@@ -18,7 +18,8 @@ public class JsonHelper {
         return "{\"productId\":" + p.getProductId() +
                ",\"name\":\"" + escapeJson(p.getName()) +
                "\",\"price\":" + p.getPrice() +
-               ",\"count\":" + p.getCount() + "}";
+               ",\"count\":" + p.getCount() + 
+               ",\"imageUrl\":\"" + escapeJson(p.getImageUrl()) + "\"}";
     }
 
     public static String toJson(User u) {

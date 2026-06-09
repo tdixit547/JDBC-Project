@@ -5,6 +5,11 @@ import model.Product;
 import service.ProductService;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Base64;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 public class ProductApiHandler extends ApiHandler {
 
@@ -64,11 +69,37 @@ public class ProductApiHandler extends ApiHandler {
         String name = JsonHelper.getJsonStringField(body, "name");
         String priceStr = JsonHelper.getJsonStringField(body, "price");
         String stockStr = JsonHelper.getJsonStringField(body, "stock");
+        String imageBase64 = JsonHelper.getJsonStringField(body, "imageBase64");
+
+        String imageUrl = null;
+        if (imageBase64 != null && imageBase64.startsWith("data:image")) {
+            try {
+                // Format: data:image/png;base64,iVBORw0K...
+                String[] parts = imageBase64.split(",");
+                if (parts.length > 1) {
+                    String extension = ".png";
+                    if (parts[0].contains("jpeg") || parts[0].contains("jpg")) extension = ".jpg";
+                    
+                    byte[] imageBytes = Base64.getDecoder().decode(parts[1]);
+                    String filename = UUID.randomUUID().toString() + extension;
+                    
+                    File dir = new File(System.getProperty("user.dir") + File.separator + "webapp" + File.separator + "img" + File.separator + "products");
+                    if (!dir.exists()) dir.mkdirs();
+                    
+                    File dest = new File(dir, filename);
+                    Files.write(dest.toPath(), imageBytes);
+                    
+                    imageUrl = "/img/products/" + filename;
+                }
+            } catch (Exception e) {
+                System.out.println("Failed to parse image: " + e.getMessage());
+            }
+        }
 
         try {
             BigDecimal price = new BigDecimal(priceStr);
             int stock = Integer.parseInt(stockStr);
-            productService.addProduct(name, price, stock);
+            productService.addProduct(name, price, stock, imageUrl);
             sendJson(exchange, 201, JsonHelper.successJson("Product added successfully"));
         } catch (Exception e) {
             sendError(exchange, 400, e.getMessage());

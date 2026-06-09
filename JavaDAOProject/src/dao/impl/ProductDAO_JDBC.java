@@ -22,6 +22,7 @@ public class ProductDAO_JDBC implements ProductDAO {
         product.setName(rs.getString("name"));
         product.setPrice(rs.getBigDecimal("price"));
         product.setCount(rs.getInt("count"));
+        product.setImageUrl(rs.getString("image_url"));
         return product;
     }
 
@@ -54,23 +55,25 @@ public class ProductDAO_JDBC implements ProductDAO {
 
     @Override
     public void insert(Product product) throws SQLException {
-        String sql = "INSERT INTO product (name, price, count) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO product (name, price, count, image_url) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, product.getName());
             ps.setBigDecimal(2, product.getPrice());
             ps.setInt(3, product.getCount());
+            ps.setString(4, product.getImageUrl() != null ? product.getImageUrl() : "/img/placeholder.png");
             ps.executeUpdate();
         }
     }
 
     @Override
     public void update(Product product) throws SQLException {
-        String sql = "UPDATE product SET name = ?, price = ?, count = ? WHERE product_id = ?";
+        String sql = "UPDATE product SET name = ?, price = ?, count = ?, image_url = ? WHERE product_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, product.getName());
             ps.setBigDecimal(2, product.getPrice());
             ps.setInt(3, product.getCount());
-            ps.setInt(4, product.getProductId());
+            ps.setString(4, product.getImageUrl() != null ? product.getImageUrl() : "/img/placeholder.png");
+            ps.setInt(5, product.getProductId());
             ps.executeUpdate();
         }
     }

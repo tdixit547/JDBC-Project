@@ -18,7 +18,7 @@ const API = {
     // Products
     getProducts() { return this.request('GET', '/api/products'); },
     getProduct(id) { return this.request('GET', `/api/products/${id}`); },
-    addProduct(name, price, stock) { return this.request('POST', '/api/products', { name, price, stock }); },
+    addProduct(name, price, stock, imageBase64 = null) { return this.request('POST', '/api/products', { name, price, stock, imageBase64 }); },
     updateStock(id, count) { return this.request('PUT', `/api/products/${id}/stock`, { count }); },
     deleteProduct(id) { return this.request('DELETE', `/api/products/${id}`); },
 

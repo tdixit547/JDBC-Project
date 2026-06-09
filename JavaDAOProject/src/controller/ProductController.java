@@ -109,7 +109,7 @@ public class ProductController {
         int stock = ConsoleHelper.readInt(scanner, "Initial stock quantity");
 
         try {
-            productService.addProduct(name, price, stock);
+            productService.addProduct(name, price, stock, null);
             System.out.println();
             ConsoleHelper.printSuccess("Product '" + name + "' added successfully!");
             ConsoleHelper.printKeyValue("Price", ConsoleHelper.formatCurrency(price));

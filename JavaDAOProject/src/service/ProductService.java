@@ -29,7 +29,7 @@ public class ProductService {
         return product;
     }
 
-    public void addProduct(String name, BigDecimal price, int stock) throws SQLException, InvalidInputException {
+    public void addProduct(String name, BigDecimal price, int stock, String imageUrl) throws SQLException, InvalidInputException {
         if (name == null || name.trim().isEmpty()) {
             throw new InvalidInputException("Product name cannot be empty.");
         }
@@ -39,7 +39,7 @@ public class ProductService {
         if (stock < 0) {
             throw new InvalidInputException("Stock count cannot be negative.");
         }
-        productDAO.insert(new Product(name.trim(), price, stock));
+        productDAO.insert(new Product(name.trim(), price, stock, imageUrl));
     }
 
     public void updateProduct(Product product) throws SQLException, InvalidInputException {

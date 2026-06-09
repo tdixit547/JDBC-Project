@@ -25,7 +25,7 @@ public class UserDAO_JDBC implements UserDAO {
 
     @Override
     public User getById(int userId) throws SQLException {
-        String sql = "SELECT * FROM user WHERE user_id = ?";
+        String sql = "SELECT * FROM users WHERE user_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -39,7 +39,7 @@ public class UserDAO_JDBC implements UserDAO {
 
     @Override
     public List<User> getAll() throws SQLException {
-        String sql = "SELECT * FROM user";
+        String sql = "SELECT * FROM users";
         List<User> users = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -52,7 +52,7 @@ public class UserDAO_JDBC implements UserDAO {
 
     @Override
     public int insert(User user) throws SQLException {
-        String sql = "INSERT INTO user (name, email) VALUES (?, ?)";
+        String sql = "INSERT INTO users (name, email) VALUES (?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getName());
             ps.setString(2, user.getEmail());
@@ -68,7 +68,7 @@ public class UserDAO_JDBC implements UserDAO {
 
     @Override
     public void update(User user) throws SQLException {
-        String sql = "UPDATE user SET name = ?, email = ? WHERE user_id = ?";
+        String sql = "UPDATE users SET name = ?, email = ? WHERE user_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, user.getName());
             ps.setString(2, user.getEmail());
@@ -79,7 +79,7 @@ public class UserDAO_JDBC implements UserDAO {
 
     @Override
     public void delete(int userId) throws SQLException {
-        String sql = "DELETE FROM user WHERE user_id = ?";
+        String sql = "DELETE FROM users WHERE user_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ps.executeUpdate();

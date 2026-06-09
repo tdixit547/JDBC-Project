@@ -149,11 +149,12 @@ async function renderProducts() {
             ${products.length === 0 ? '<div class="empty-state">No products found. Add your first product.</div>' : `
             <div class="table-container">
                 <table class="data-table">
-                    <thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Image</th><th>Name</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
                     <tbody>
                         ${products.map(p => `
                             <tr>
                                 <td>${p.productId}</td>
+                                <td><img src="${p.imageUrl || '/img/placeholder.png'}" alt="Product" style="width:40px;height:40px;object-fit:cover;border-radius:4px"></td>
                                 <td>${p.name}</td>
                                 <td>${formatCurrency(p.price)}</td>
                                 <td>${stockBadge(p.count)}</td>
@@ -174,6 +175,7 @@ async function renderProducts() {
                 <div class="form-group"><label>Product Name</label><input id="inp-name" type="text" placeholder="e.g. Wireless Mouse"></div>
                 <div class="form-group"><label>Price</label><input id="inp-price" type="number" step="0.01" placeholder="e.g. 1299.00"></div>
                 <div class="form-group"><label>Stock Quantity</label><input id="inp-stock" type="number" placeholder="e.g. 50"></div>
+                <div class="form-group"><label>Product Image</label><input id="inp-image" type="file" accept="image/*"></div>
                 <div class="form-actions">
                     <button class="btn btn-secondary" onclick="hideModal()">Cancel</button>
                     <button class="btn btn-primary" id="btn-submit-product">Add Product</button>
@@ -184,7 +186,20 @@ async function renderProducts() {
                     const name = document.getElementById('inp-name').value;
                     const price = document.getElementById('inp-price').value;
                     const stock = document.getElementById('inp-stock').value;
-                    await API.addProduct(name, price, stock);
+                    const fileInput = document.getElementById('inp-image');
+                    let base64 = null;
+
+                    if (fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        base64 = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = error => reject(error);
+                            reader.readAsDataURL(file);
+                        });
+                    }
+
+                    await API.addProduct(name, price, stock, base64);
                     hideModal();
                     showToast('Product added successfully');
                     renderProducts();

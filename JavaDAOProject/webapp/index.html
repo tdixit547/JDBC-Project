@@ -3,64 +3,696 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ShopAdmin - E-Commerce Management Dashboard">
-    <title>ShopAdmin - Dashboard</title>
+    <title>ShopZone — Login</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <style>
+        :root {
+            --bg: #07070e;
+            --bg-2: #0f0f18;
+            --bg-3: #16161f;
+            --border: rgba(255,255,255,0.07);
+            --border-active: rgba(255,255,255,0.15);
+            --text: #f0f0f5;
+            --text-2: #8888a0;
+            --text-3: #44445a;
+            --purple: #7c3aed;
+            --purple-2: #a855f7;
+            --purple-glow: rgba(124,58,237,0.2);
+            --blue: #2563eb;
+            --blue-2: #3b82f6;
+            --blue-glow: rgba(37,99,235,0.2);
+            --green: #10b981;
+            --red: #ef4444;
+            --radius: 16px;
+            --shadow: 0 24px 64px rgba(0,0,0,0.5);
+            --t: 0.2s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Animated Background ─────────────────────────────────── */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.35;
+        }
+
+        .orb-1 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, #7c3aed, transparent);
+            top: -100px; left: -100px;
+            animation: drift 8s ease-in-out infinite alternate;
+        }
+
+        .orb-2 {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, #2563eb, transparent);
+            bottom: -100px; right: -100px;
+            animation: drift 10s ease-in-out infinite alternate-reverse;
+        }
+
+        .orb-3 {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, #a855f7, transparent);
+            top: 50%; right: 20%;
+            animation: drift 7s ease-in-out infinite alternate;
+        }
+
+        @keyframes drift {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(40px, 30px) scale(1.1); }
+        }
+
+        /* Grid overlay */
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0;
+        }
+
+        /* ── Main Container ──────────────────────────────────────── */
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 520px;
+            padding: 20px;
+        }
+
+        /* Logo */
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, var(--purple), var(--purple-2));
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 24px var(--purple-glow);
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #fff 30%, var(--purple-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo p {
+            color: var(--text-2);
+            font-size: 0.88rem;
+            margin-top: 4px;
+        }
+
+        /* ── Login Card ──────────────────────────────────────────── */
+        .login-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 18px 16px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-2);
+            transition: all var(--t);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            background: none;
+            font-family: inherit;
+        }
+
+        .tab:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+
+        .tab.active {
+            color: var(--text);
+            background: var(--bg-3);
+            position: relative;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; left: 0; right: 0;
+            height: 2px;
+        }
+
+        .tab-admin.active::after { background: linear-gradient(90deg, var(--blue), var(--blue-2)); }
+        .tab-customer.active::after { background: linear-gradient(90deg, var(--purple), var(--purple-2)); }
+
+        .tab-icon { font-size: 1.1rem; }
+
+        /* Tab Panels */
+        .tab-panels {
+            padding: 28px;
+        }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* ── Panel Header ────────────────────────────────────────── */
+        .panel-header {
+            margin-bottom: 24px;
+        }
+
+        .panel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .badge-admin {
+            background: rgba(37,99,235,0.12);
+            border: 1px solid rgba(59,130,246,0.2);
+            color: var(--blue-2);
+        }
+
+        .badge-customer {
+            background: var(--purple-glow);
+            border: 1px solid rgba(168,85,247,0.2);
+            color: var(--purple-2);
+        }
+
+        .panel-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .panel-header p {
+            color: var(--text-2);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* ── Form ────────────────────────────────────────────────── */
+        .form-group { margin-bottom: 16px; }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-2);
+            margin-bottom: 7px;
+            letter-spacing: 0.3px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-3);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 11px 14px 11px 38px;
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color var(--t), box-shadow var(--t);
+        }
+
+        .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238888a0' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-color: var(--bg-3);
+            appearance: none;
+            padding-right: 36px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px var(--purple-glow);
+        }
+
+        .admin-panel .form-group input:focus,
+        .admin-panel .form-group select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px var(--blue-glow);
+        }
+
+        /* Wallet Preview */
+        .wallet-preview {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 13px 16px;
+            background: rgba(16,185,129,0.06);
+            border: 1px solid rgba(16,185,129,0.15);
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+
+        .wallet-preview-label {
+            font-size: 0.82rem;
+            color: var(--text-2);
+        }
+
+        .wallet-preview-amount {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        /* Error */
+        .error-msg {
+            font-size: 0.82rem;
+            color: var(--red);
+            margin-bottom: 14px;
+            padding: 10px 14px;
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .error-msg.visible { display: block; }
+
+        /* ── Buttons ─────────────────────────────────────────────── */
+        .btn {
+            width: 100%;
+            padding: 13px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            transition: all var(--t);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.2px;
+        }
+
+        .btn-admin {
+            background: linear-gradient(135deg, var(--blue), var(--blue-2));
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(37,99,235,0.35);
+        }
+
+        .btn-admin:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(37,99,235,0.5);
+        }
+
+        .btn-customer {
+            background: linear-gradient(135deg, var(--purple), var(--purple-2));
+            color: #fff;
+            box-shadow: 0 4px 16px var(--purple-glow);
+        }
+
+        .btn-customer:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(124,58,237,0.5);
+        }
+
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+        /* Admin hint */
+        .admin-hint {
+            margin-top: 16px;
+            padding: 12px 14px;
+            background: rgba(37,99,235,0.06);
+            border: 1px solid rgba(59,130,246,0.12);
+            border-radius: 8px;
+            font-size: 0.78rem;
+            color: var(--text-2);
+            line-height: 1.6;
+        }
+
+        .admin-hint strong { color: var(--blue-2); }
+
+        /* Footer */
+        .login-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.78rem;
+            color: var(--text-3);
+        }
+
+        /* Loading spinner */
+        .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
-    <nav id="sidebar">
-        <div class="sidebar-header">
-            <div class="brand">ShopAdmin</div>
-            <div class="tagline">Management Panel</div>
+
+    <!-- Animated background -->
+    <div class="bg-layer">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    <div class="grid-overlay"></div>
+
+    <div class="container">
+
+        <!-- Logo -->
+        <div class="logo">
+            <div class="logo-icon">ShopZone</div>
+            <h1>ShopZone</h1>
+            <p>Sign in to your account</p>
         </div>
-        <ul class="nav-links">
-            <li>
-                <a href="#" data-page="dashboard" class="active">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="products">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                    <span>Products</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="users">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    <span>Users</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="cart">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                    <span>Cart</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="orders">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                    <span>Orders</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
 
-    <main id="content">
-        <!-- Pages render here -->
-    </main>
+        <!-- Login Card -->
+        <div class="login-card">
 
-    <div id="modal-overlay" class="modal-overlay hidden">
-        <div id="modal" class="modal"></div>
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab tab-admin active" data-tab="admin">
+                    Admin
+                </button>
+                <button class="tab tab-customer" data-tab="customer">
+                    Customer
+                </button>
+            </div>
+
+            <div class="tab-panels">
+
+                <!-- ── ADMIN PANEL ─────────────────────────────── -->
+                <div class="panel admin-panel active" id="panel-admin">
+                    <div class="panel-header">
+                        <div class="panel-badge badge-admin">Secure Access</div>
+                        <h2>Admin Login</h2>
+                        <p>Access the management dashboard to manage products, users, and orders.</p>
+                    </div>
+
+                    <div class="error-msg" id="admin-error">Invalid credentials. Please try again.</div>
+
+                    <div class="form-group">
+                        <label>Username</label>
+                        <div class="input-wrap">
+                            <input type="text" id="admin-username" placeholder="Enter admin username" autocomplete="username">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="input-wrap">
+                            <input type="password" id="admin-password" placeholder="Enter password" autocomplete="current-password">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-admin" id="btn-admin-login">
+                        <span id="admin-btn-text">Sign in as Admin →</span>
+                        <div class="spinner" id="admin-spinner"></div>
+                    </button>
+
+                    <div class="admin-hint">
+                        Default credentials — Username: <strong>admin</strong> &nbsp;|&nbsp; Password: <strong>admin123</strong>
+                    </div>
+                </div>
+
+                <!-- ── CUSTOMER PANEL ──────────────────────────── -->
+                <div class="panel" id="panel-customer">
+                    <div class="panel-header">
+                        <div class="panel-badge badge-customer">Shop & Order</div>
+                        <h2>Customer Login</h2>
+                        <p>Browse products, manage your cart, and track your orders.</p>
+                    </div>
+
+                    <div class="error-msg" id="customer-error">Please select an account to continue.</div>
+
+                    <div class="form-group">
+                        <label>Select Your Account</label>
+                        <div class="input-wrap">
+                            <select id="customer-select">
+                                <option value="">Loading accounts...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="wallet-preview" id="wallet-preview" style="display:none">
+                        <span class="wallet-preview-label">Wallet Balance</span>
+                        <span class="wallet-preview-amount" id="wallet-preview-amount">₹0.00</span>
+                    </div>
+
+                    <button class="btn btn-customer" id="btn-customer-login">
+                        <span id="customer-btn-text">Continue to Store →</span>
+                        <div class="spinner" id="customer-spinner"></div>
+                    </button>
+                    
+                    <div style="text-align:center;margin-top:16px;">
+                        <a href="#" id="link-register" style="color:var(--purple);font-size:0.85rem;text-decoration:none;font-weight:600;">Need an account? Register here</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="login-footer">ShopZone E-Commerce System &nbsp;·&nbsp; DBMS Lab Project</div>
     </div>
 
-    <div id="toast-container" class="toast-container"></div>
+    <script>
+        // ── If already logged in, redirect ────────────────────────
+        (function() {
+            const session = Auth.getSession();
+            if (session?.type === 'admin') window.location.replace('/admin.html');
+            else if (session?.type === 'customer') window.location.replace('/shop.html');
+        })();
 
-    <script src="js/api.js"></script>
-    <script src="js/app.js"></script>
+        // ── Tab Switching ─────────────────────────────────────────
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.tab;
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`panel-${target}`).classList.add('active');
+                // Clear errors
+                document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('visible'));
+            });
+        });
+
+        // ── Admin Login ───────────────────────────────────────────
+        const ADMIN_USER = 'admin';
+        const ADMIN_PASS = 'admin123';
+
+        function showAdminError(msg) {
+            const el = document.getElementById('admin-error');
+            el.textContent = msg;
+            el.classList.add('visible');
+        }
+
+        async function adminLogin() {
+            const username = document.getElementById('admin-username').value.trim();
+            const password = document.getElementById('admin-password').value;
+            const btn = document.getElementById('btn-admin-login');
+            const btnText = document.getElementById('admin-btn-text');
+            const spinner = document.getElementById('admin-spinner');
+
+            document.getElementById('admin-error').classList.remove('visible');
+
+            if (!username || !password) {
+                showAdminError('Please enter both username and password.');
+                return;
+            }
+
+            if (username !== ADMIN_USER || password !== ADMIN_PASS) {
+                showAdminError('Invalid credentials. Please try again.');
+                // Shake animation
+                btn.style.animation = 'none';
+                setTimeout(() => {
+                    btn.style.animation = 'shake 0.4s ease';
+                }, 10);
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.textContent = 'Signing in...';
+            spinner.style.display = 'block';
+
+            await new Promise(r => setTimeout(r, 600)); // brief pause for UX
+            Auth.setAdminSession();
+            window.location.replace('/admin.html');
+        }
+
+        document.getElementById('btn-admin-login').addEventListener('click', adminLogin);
+        document.getElementById('admin-password').addEventListener('keydown', e => {
+            if (e.key === 'Enter') adminLogin();
+        });
+
+        // ── Customer Login ────────────────────────────────────────
+        async function loadUsers() {
+            const select = document.getElementById('customer-select');
+            try {
+                const users = await API.getUsers();
+                if (users.length === 0) {
+                    select.innerHTML = '<option value="">No accounts found</option>';
+                    return;
+                }
+                select.innerHTML = '<option value="">— Select your account —</option>' +
+                    users.map(u => `<option value="${u.userId}">${u.name} (${u.email})</option>`).join('');
+            } catch (err) {
+                select.innerHTML = '<option value="">Failed to load accounts</option>';
+            }
+        }
+
+        loadUsers();
+
+        document.getElementById('customer-select').addEventListener('change', async function() {
+            const id = parseInt(this.value);
+            const preview = document.getElementById('wallet-preview');
+            if (!id) { preview.style.display = 'none'; return; }
+            try {
+                const wallet = await API.getWallet(id);
+                const balance = parseFloat(wallet.balance);
+                document.getElementById('wallet-preview-amount').textContent =
+                    '₹' + balance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                preview.style.display = 'flex';
+            } catch {
+                preview.style.display = 'none';
+            }
+        });
+
+        async function customerLogin() {
+            const select = document.getElementById('customer-select');
+            const id = parseInt(select.value);
+            const btn = document.getElementById('btn-customer-login');
+            const btnText = document.getElementById('customer-btn-text');
+            const spinner = document.getElementById('customer-spinner');
+
+            document.getElementById('customer-error').classList.remove('visible');
+
+            if (!id) {
+                document.getElementById('customer-error').textContent = 'Please select an account to continue.';
+                document.getElementById('customer-error').classList.add('visible');
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.textContent = 'Loading...';
+            spinner.style.display = 'block';
+
+            try {
+                const [user, wallet] = await Promise.all([
+                    API.getUser(id),
+                    API.getWallet(id)
+                ]);
+                Auth.setCustomerSession(user, wallet);
+                window.location.replace('/shop.html');
+            } catch (err) {
+                document.getElementById('customer-error').textContent = err.message;
+                document.getElementById('customer-error').classList.add('visible');
+                btn.disabled = false;
+                btnText.textContent = 'Continue to Store →';
+                spinner.style.display = 'none';
+            }
+        }
+
+        document.getElementById('btn-customer-login').addEventListener('click', customerLogin);
+
+        // ── Register User ─────────────────────────────────────────
+        document.getElementById('link-register').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const name = prompt("Enter your full name:");
+            if (!name) return;
+            const email = prompt("Enter your email address:");
+            if (!email) return;
+            
+            try {
+                await API.registerUser(name, email);
+                alert("Registration successful! You can now select your account.");
+                loadUsers();
+            } catch (err) {
+                alert("Registration failed: " + err.message);
+            }
+        });
+
+        // shake keyframe
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%,100% { transform: translateX(0); }
+                20%,60% { transform: translateX(-8px); }
+                40%,80% { transform: translateX(8px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
