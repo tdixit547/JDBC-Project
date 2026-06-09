@@ -2,7 +2,7 @@
 
 ShopZone is a full-stack, single-page application (SPA) built to demonstrate robust web development and backend engineering using pure Java and JDBC. The project avoids heavy frameworks like Spring Boot, Tomcat, or React to focus heavily on foundational software architecture, including custom HTTP routing, JSON parsing, Data Access Objects (DAO), and ACID transaction management.
 
-## 🚀 Features
+##  Features
 
 ### Customer Storefront
 * **Dynamic Product Catalog:** View premium tech products with custom uploaded photos dynamically fetched from the database.
@@ -18,7 +18,7 @@ ShopZone is a full-stack, single-page application (SPA) built to demonstrate rob
 * **User Management:** Register new users and add balance to user wallets.
 * **Cart & Order Tracking:** View active carts and full order history for any user by User ID.
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 * **Frontend:** HTML5, CSS3 (Custom variables, glassmorphism, flexbox/grid), Vanilla JavaScript (ES6+, Fetch API, async/await).
 * **Backend:** Java 11+
@@ -26,7 +26,7 @@ ShopZone is a full-stack, single-page application (SPA) built to demonstrate rob
 * **Database Engine:** MySQL 8.0+
 * **Database Connectivity:** JDBC (`mysql-connector-j`)
 
-## 🏗️ Architecture & Deep Concepts
+##  Architecture 
 
 ### Data Access Object (DAO) Pattern
 Instead of mixing SQL queries with business logic, the application uses the DAO pattern. 
@@ -44,7 +44,7 @@ By utilizing `conn.setAutoCommit(false)` and `conn.commit()`, the system ensures
 ### Custom HTTP Server & API
 The server (`AppServer.java`) explicitly registers route handlers (`ProductApiHandler`, `UserApiHandler`). A lightweight `JsonHelper` utility extracts fields from incoming JSON payloads and formats outgoing Java objects, bypassing the need for dependencies like Jackson or Gson.
 
-## ⚙️ Setup & Installation
+##  Setup & Installation
 
 ### Prerequisites
 * Java Development Kit (JDK 11 or higher)
@@ -80,5 +80,5 @@ The server (`AppServer.java`) explicitly registers route handlers (`ProductApiHa
    http://localhost:8081/index.html
    ```
 
-## 📸 Screenshots & Design
+##  Screenshots & Design
 The UI leverages a deeply aesthetic modern design featuring vibrant gradients, dark mode, smooth transitions, toast notifications, and interactive elements. All navigation is handled purely client-side for a seamless SPA experience.
